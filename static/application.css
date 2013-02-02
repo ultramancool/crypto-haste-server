@@ -129,6 +129,11 @@ textarea {
 	font-weight: normal;
 }
 
+#box4 {
+	padding: 10px 15px;
+	background: #173e48; 
+}
+
 #box2 .function.save { background-position: -5px top; }
 #box2 .function.enabled.save { background-position: -5px center; }
 #box2 .function.enabled.save:hover { background-position: -5px bottom; }

@@ -22,7 +22,13 @@ haste_document.prototype.load = function(key, callback, lang) {
     success: function(res) {
       _this.locked = true;
       _this.key = key;
+      if (window.location.hash) {
+	crypt_key = window.location.hash.substring(1);
+        res.data = sjcl.decrypt(crypt_key, res.data);
+	$("#password").val(crypt_key);
+      }
       _this.data = res.data;
+      
       try {
         var high;
         if (lang === 'txt') {
@@ -56,6 +62,10 @@ haste_document.prototype.save = function(data, callback) {
   if (this.locked) {
     return false;
   }
+  var high = hljs.highlightAuto(data);
+  if ($("#password").val() != "") {
+    data = sjcl.encrypt($("#password").val(), data, {iter: 2000, ks: 256});
+  }
   this.data = data;
   var _this = this;
   $.ajax('/documents', {
@@ -66,7 +76,6 @@ haste_document.prototype.save = function(data, callback) {
     success: function(res) {
       _this.locked = true;
       _this.key = res.key;
-      var high = hljs.highlightAuto(data);
       callback(null, {
         value: high.value,
         key: res.key,
@@ -240,7 +249,6 @@ haste.prototype.lockDocument = function() {
       _this.showMessage(err.message, 'error');
     }
     else if (ret) {
-      _this.$code.html(ret.value);
       _this.setTitle(ret.key);
       var file = '/' + ret.key;
       if (ret.language) {
@@ -251,6 +259,11 @@ haste.prototype.lockDocument = function() {
       _this.$textarea.val('').hide();
       _this.$box.show().focus();
       _this.addLineNumbers(ret.lineCount);
+      if ($("#password").val() != "") {
+	      window.location.hash = $("#password").val();
+      } else {
+      _this.$code.html(ret.value);
+      }
     }
   });
 };
