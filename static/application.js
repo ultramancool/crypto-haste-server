@@ -62,7 +62,14 @@ haste_document.prototype.save = function(data, callback) {
   if (this.locked) {
     return false;
   }
-  var high = hljs.highlightAuto(data);
+  try {
+	var high = hljs.highlight($("#highlight").val(), data);
+	high.language = $("#highlight").val();
+  } catch (err) {
+	// highlight failed. falling back to auto.
+	var high = hljs.highlightAuto(data);
+  }
+  console.log("lang: " + high.language)
   if ($("#password").val() != "") {
     data = sjcl.encrypt($("#password").val(), data, {iter: 2000, ks: 256});
   }
@@ -219,6 +226,7 @@ haste.prototype.loadDocument = function(key) {
   _this.doc = new haste_document();
   _this.doc.load(parts[0], function(ret) {
     if (ret) {
+      $("#highlight").val(ret.language)
       _this.$code.html(ret.value);
       _this.setTitle(ret.key);
       _this.fullKey();
